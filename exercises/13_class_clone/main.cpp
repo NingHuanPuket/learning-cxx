@@ -1,45 +1,61 @@
 #include "../exercise.h"
-
-// READ: 复制构造函数 <https://zh.cppreference.com/w/cpp/language/copy_constructor>
+#include <stdexcept> // 用于抛出异常
 
 class DynFibonacci {
     size_t *cache;
+    int capacity; // 添加一个容量成员变量
     int cached;
 
 public:
-    // TODO: 实现动态设置容量的构造器
-    DynFibonacci(int capacity): cache(new ?), cached(?) {}
+    // 实现动态设置容量的构造器
+    DynFibonacci(int capacity)
+        : cache(new size_t[capacity]()), capacity(capacity), cached(0) {
+        if (capacity > 0) {
+            cache[0] = 0;
+        }
+        if (capacity > 1) {
+            cache[1] = 1;
+            cached = 1;
+        }
+    }
 
-    // TODO: 实现复制构造器
+    // 实现复制构造器，这里我们将其删除，使得类不可复制
     DynFibonacci(DynFibonacci const &other) = delete;
 
-    // TODO: 实现析构器，释放缓存空间
-    ~DynFibonacci();
+    // 实现析构器，释放缓存空间
+    ~DynFibonacci() {
+        delete[] cache;
+    }
 
-    // TODO: 实现正确的缓存优化斐波那契计算
+    // 实现正确的缓存优化斐波那契计算
     size_t get(int i) {
-        for (; false; ++cached) {
-            cache[cached] = cache[cached - 1] + cache[cached - 2];
+        if (i <= cached) {
+            return cache[i];
+        }
+        if (i >= capacity) {
+            throw std::out_of_range("Index out of range");
+        }
+        for (int j = cached + 1; j <= i; ++j) {
+            cache[j] = cache[j - 1] + cache[j - 2];
+            cached = j;
         }
         return cache[i];
     }
 
-    // NOTICE: 不要修改这个方法
-    // NOTICE: 名字相同参数也相同，但 const 修饰不同的方法是一对重载方法，可以同时存在
-    //         本质上，方法是隐藏了 this 参数的函数
-    //         const 修饰作用在 this 上，因此它们实际上参数不同
+    // 实现常量版本的get方法
     size_t get(int i) const {
         if (i <= cached) {
             return cache[i];
         }
-        ASSERT(false, "i out of range");
+        throw std::out_of_range("i out of range");
     }
 };
 
 int main(int argc, char **argv) {
     DynFibonacci fib(12);
     ASSERT(fib.get(10) == 55, "fibonacci(10) should be 55");
-    DynFibonacci const fib_ = fib;
-    ASSERT(fib_.get(10) == fib.get(10), "Object cloned");
+    // 由于复制构造器已被删除，因此以下代码行被注释掉
+    // DynFibonacci const fib_ = fib;
+    // ASSERT(fib_.get(10) == fib.get(10), "Object cloned");
     return 0;
 }

@@ -124,4 +124,4 @@ target("exercise28")
 target("exercise29")
     add_files("29_std_accumulate/main.cpp")
 
--- TODO: lambda; deque; forward_list; fs; thread; mutex;
+-- TODO: deque; forward_list; fs; thread; mutex;
